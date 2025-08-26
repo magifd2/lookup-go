@@ -79,7 +79,7 @@ package: clean cross-build macos-universal
 			else \
 				tar -czf "$$archive_name.tar.gz" -C "$$platform_dir" $(BINARY_NAME) > /dev/null; \
 			fi; \
-			rm -r "$$platform_dir"; \
+			
 			echo -e "  \033[32m✓ Created archive:\033[0m $$archive_name"; \
 		fi; \
 	done

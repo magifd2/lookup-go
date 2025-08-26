@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
+	
 	"reflect"
 	"strings"
 	"testing"
@@ -122,7 +122,7 @@ func compareJSON(actual, expected []byte, isJsonL bool) error {
 
 // compareSingleJSON compares two single JSON objects/arrays.
 func compareSingleJSON(actual, expected []byte) error {
-	var actualObj, expectedObj interface{}/
+	var actualObj, expectedObj interface{}
 
 	if err := json.Unmarshal(bytes.TrimSpace(actual), &actualObj); err != nil {
 		return fmt.Errorf("failed to unmarshal actual output: %w\nOutput: %s", err, string(actual))
