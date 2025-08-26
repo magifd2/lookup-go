@@ -21,7 +21,7 @@ BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 LDFLAGS = -ldflags="-s -w -X 'main.version=$(VERSION) (build: $(COMMIT_HASH), date: $(BUILD_DATE))'"
 
 # Platforms for cross-compilation
-PLATFORMS ?= darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64 windows/arm64
+PLATFORMS ?= darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 windows/amd64
 # Get the current platform string, e.g., "darwin_amd64"
 CURRENT_PLATFORM = $(shell go env GOOS)_$(shell go env GOARCH)
 
@@ -82,13 +82,10 @@ package: clean cross-build macos-universal
 	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_linux_arm64.tar.gz" -C "$(BIN_DIR)/linux_arm64" $(BINARY_NAME)
 	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_linux_arm64.tar.gz"
 	# Package windows/amd64
-	@mv "$(BIN_DIR)/windows_amd64/$(BINARY_NAME)" "$(BIN_DIR)/windows_amd64/$(BINARY_NAME).exe"
+	
 	@zip -j "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_windows_amd64.zip" "$(BIN_DIR)/windows_amd64/$(BINARY_NAME).exe" > /dev/null
 	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_windows_amd64.zip"
-	# Package windows/arm64
-	@mv "$(BIN_DIR)/windows_arm64/$(BINARY_NAME)" "$(BIN_DIR)/windows_arm64/$(BINARY_NAME).exe"
-	@zip -j "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_windows_arm64.zip" "$(BIN_DIR)/windows_arm64/$(BINARY_NAME).exe" > /dev/null
-	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_windows_arm64.zip"
+	
 	# Package darwin/universal
 	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_darwin_universal.tar.gz" -C "$(BIN_DIR)/darwin_universal" $(BINARY_NAME)
 	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_darwin_universal.tar.gz"
