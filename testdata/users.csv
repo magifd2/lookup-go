@@ -1,0 +1,5 @@
+username,department,role,building,ip_range
+jdoe,Sales,Manager,A,192.168.1.10
+asmith,Engineering,Developer,B,192.168.1.25
+b-*,Engineering,QA,B,10.0.0.0/8
+^scanner-.*$,IT,Service,A,

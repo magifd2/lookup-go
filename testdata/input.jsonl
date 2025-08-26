@@ -1,0 +1,5 @@
+{"timestamp": "2023-10-28T11:00:00Z", "user": "JDOE", "event": "login"}
+{"timestamp": "2023-10-28T11:01:00Z", "hostname": "b-jones", "event": "connect"}
+{"timestamp": "2023-10-28T11:02:00Z", "process": "scanner-01", "event": "scan"}
+{"timestamp": "2023-10-28T11:03:00Z", "client_ip": "10.20.30.40", "event": "access"}
+{"timestamp": "2023-10-28T11:04:00Z", "client_ip": "8.8.8.8", "event": "external_access"}

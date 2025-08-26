@@ -1,0 +1,26 @@
+{
+  "data_source": "./users.csv",
+  "matchers": [
+    {
+      "input_field": "user",
+      "lookup_field": "username",
+      "method": "exact",
+      "case_sensitive": false
+    },
+    {
+      "input_field": "hostname",
+      "lookup_field": "username",
+      "method": "wildcard"
+    },
+    {
+      "input_field": "process",
+      "lookup_field": "username",
+      "method": "regex"
+    },
+    {
+      "input_field": "client_ip",
+      "lookup_field": "ip_range",
+      "method": "cidr"
+    }
+  ]
+}
