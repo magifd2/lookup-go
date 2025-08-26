@@ -68,21 +68,30 @@ macos-universal:
 # Create final release archives in the ./bin directory
 .PHONY: package
 package: clean cross-build macos-universal
-	@echo -e "\033[34m>> Packaging release archives into $(BIN_DIR)...";
-	@cd $(BIN_DIR) && for platform_dir in *; do \
-		if [ -d "$$platform_dir" ]; then \
-			archive_name="$(BINARY_NAME)_$(VERSION)_$$platform_dir"; \
-			binary_path="$$platform_dir/$(BINARY_NAME)"; \
-			if [[ "$$platform_dir" == *"windows"* ]]; then \
-				mv "$$binary_path" "$$platform_dir/$(BINARY_NAME).exe"; \
-				zip -j "$$archive_name.zip" "$$platform_dir/$(BINARY_NAME).exe" > /dev/null; \
-			else \
-				tar -czf "$$archive_name.tar.gz" -C "$$platform_dir" $(BINARY_NAME) > /dev/null; \
-			fi; \
-			
-			echo -e "  \033[32m✓ Created archive:\033[0m $$archive_name"; \
-		fi; \
-	done
+	@echo -e "\033[34m>> Packaging release archives into $(BIN_DIR)...\033[0m"
+	# Package darwin/amd64
+	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_darwin_amd64.tar.gz" -C "$(BIN_DIR)/darwin_amd64" $(BINARY_NAME)
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_darwin_amd64.tar.gz"
+	# Package darwin/arm64
+	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_darwin_arm64.tar.gz" -C "$(BIN_DIR)/darwin_arm64" $(BINARY_NAME)
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_darwin_arm64.tar.gz"
+	# Package linux/amd64
+	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_linux_amd64.tar.gz" -C "$(BIN_DIR)/linux_amd64" $(BINARY_NAME)
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_linux_amd64.tar.gz"
+	# Package linux/arm64
+	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_linux_arm64.tar.gz" -C "$(BIN_DIR)/linux_arm64" $(BINARY_NAME)
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_linux_arm64.tar.gz"
+	# Package windows/amd64
+	@mv "$(BIN_DIR)/windows_amd64/$(BINARY_NAME)" "$(BIN_DIR)/windows_amd64/$(BINARY_NAME).exe"
+	@zip -j "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_windows_amd64.zip" "$(BIN_DIR)/windows_amd64/$(BINARY_NAME).exe" > /dev/null
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_windows_amd64.zip"
+	# Package windows/arm64
+	@mv "$(BIN_DIR)/windows_arm64/$(BINARY_NAME)" "$(BIN_DIR)/windows_arm64/$(BINARY_NAME).exe"
+	@zip -j "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_windows_arm64.zip" "$(BIN_DIR)/windows_arm64/$(BINARY_NAME).exe" > /dev/null
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_windows_arm64.zip"
+	# Package darwin/universal
+	@tar -czf "$(BIN_DIR)/$(BINARY_NAME)_$(VERSION)_darwin_universal.tar.gz" -C "$(BIN_DIR)/darwin_universal" $(BINARY_NAME)
+	@echo -e "  \033[32m✓ Created archive:\033[0m $(BINARY_NAME)_$(VERSION)_darwin_universal.tar.gz"
 	@echo -e "\033[32m✓ Packaging complete.\033[0m"
 
 
