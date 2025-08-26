@@ -1,0 +1,32 @@
+[
+  {
+    "event": "login",
+    "timestamp": "2023-10-28T11:00:00Z",
+    "user": "JDOE"
+  },
+  {
+    "event": "connect",
+    "hostname": "b-jones",
+    "timestamp": "2023-10-28T11:01:00Z"
+  },
+  {
+    "event": "scan",
+    "process": "scanner-01",
+    "timestamp": "2023-10-28T11:02:00Z"
+  },
+  {
+    "building": "B",
+    "client_ip": "10.20.30.40",
+    "department": "Engineering",
+    "event": "access",
+    "ip_range": "10.0.0.0/8",
+    "role": "QA",
+    "timestamp": "2023-10-28T11:03:00Z",
+    "username": "b-*"
+  },
+  {
+    "client_ip": "8.8.8.8",
+    "event": "external_access",
+    "timestamp": "2023-10-28T11:04:00Z"
+  }
+]
