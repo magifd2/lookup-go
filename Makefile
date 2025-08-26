@@ -39,9 +39,14 @@ build:
 	@echo "\033[34m>> Building $(BINARY_NAME) for current OS/Arch...\033[0m"
 	go build $(LDFLAGS) -o $(BINARY_NAME) main.go
 
+.PHONY: test
+test:
+	@echo "\033[34m>> Running tests...\033[0m"
+	go test -v ./...
+
 # Requires 'gox' to be installed (go install github.com/mitchellh/gox@latest)
 .PHONY: release
-release: check-gox clean
+release: test check-gox clean
 	@echo "\033[34m>> Starting release build for version $(VERSION)...\033[0m"
 	@gox -osarch="$(PLATFORMS)" -output="$(RELEASE_DIR)/$(BINARY_NAME)_$(VERSION)_{{.OS}}_{{.Arch}}/$(BINARY_NAME)" $(LDFLAGS)
 	@echo "\033[32m✓ Cross-compilation complete.\033[0m"
@@ -67,7 +72,7 @@ package: release macos-universal
 	@echo "\033[34m>> Packaging release archives...\033[0m"
 	@cd $(RELEASE_DIR) && for dir in *; do \
 		if [ -d "$$dir" ]; then \
-			base_name=$${dir};
+			base_name=$${dir}; \
 			if [[ "$$dir" == *"windows"* ]]; then \
 				mv "$$dir/$(BINARY_NAME)" "$$dir/$(BINARY_NAME).exe"; \
 				zip -j "$$base_name.zip" "$$dir/$(BINARY_NAME).exe" > /dev/null; \
@@ -93,7 +98,7 @@ clean:
 .PHONY: check-gox
 check-gox:
 	@if ! command -v gox &> /dev/null; then \
-		echo "\033[31mError: gox is not installed. Please run: go install github.com/mitchellh/gox@latest"; \
+		echo "\033[31mError: gox is not installed. Please run: go install github.com/mitchellh/gox@latest\033[0m"; \
 		exit 1; \
 	fi
 
@@ -104,6 +109,7 @@ help:
 	@echo "Targets:"
 	@echo "  all              Alias for build."
 	@echo "  build            Build the binary for the current OS/architecture."
+	@echo "  test             Run all tests."
 	@echo "  release          Build binaries for all target platforms (requires gox)."
 	@echo "  macos-universal  Create a macOS universal binary."
 	@echo "  package          Create release archives for all platforms."
