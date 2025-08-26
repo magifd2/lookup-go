@@ -29,7 +29,7 @@ CURRENT_PLATFORM = $(shell go env GOOS)_$(shell go env GOARCH)
 # --- Main Targets ---
 
 .PHONY: all
-all: build
+all: cross-build macos-universal
 
 # Build for the current host platform
 .PHONY: build
@@ -108,7 +108,7 @@ help:
 	@echo -e "Usage: make <target>"
 	@echo -e ""
 	@echo -e "Targets:"
-	@echo -e "  all              Alias for build."
+	@echo -e "  all              Build for all target platforms (cross-compile)."
 	@echo -e "  build            Build for the current host platform into ./bin/{os}_{arch}/"
 	@echo -e "  test             Run all tests."
 	@echo -e "  cross-build      Cross-compile for all target platforms into ./bin/"
