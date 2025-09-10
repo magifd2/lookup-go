@@ -57,6 +57,12 @@ var version = "dev"
 
 // --- main関数 ---
 func main() {
+	// サブコマンドのチェック
+	if len(os.Args) > 1 && os.Args[1] == "generate-config" {
+		handleGenerateConfig()
+		return // generate-configが実行されたらここで終了
+	}
+
 	flag.Parse()
 	log.SetOutput(os.Stderr)
 
@@ -105,7 +111,7 @@ func main() {
 		switch strings.ToLower(ext) {
 		case ".csv":
 			lookupData, err = loadLookupDataFromCSV(dataSourcePath)
-		case ".json":
+		case ".json", ".jsonl":
 			lookupData, err = loadLookupDataFromJSON(dataSourcePath)
 		default:
 			err = fmt.Errorf("unsupported data_source format '%s'", ext)
@@ -427,4 +433,140 @@ func printJSON(data map[string]interface{}) {
 		return
 	}
 	fmt.Println(string(output))
+}
+
+// --- 雛形生成機能 ---
+
+// handleGenerateConfig は generate-config サブコマンドの引数を処理し、実行します。
+func handleGenerateConfig() {
+	genCmd := flag.NewFlagSet("generate-config", flag.ExitOnError)
+	filePath := genCmd.String("file", "", "Path to the data source file (CSV or JSON).")
+	genCmd.Parse(os.Args[2:])
+
+	if *filePath == "" {
+		log.Fatal("Error: -file flag is required for generate-config command.")
+	}
+
+	var headers []string
+	var err error
+
+	ext := filepath.Ext(*filePath)
+	switch strings.ToLower(ext) {
+	case ".csv":
+		headers, err = extractHeadersFromCSV(*filePath)
+	case ".json", ".jsonl":
+		headers, err = extractKeysFromJSON(*filePath)
+	default:
+		log.Fatalf("Error: Unsupported file type '%s'. Only .csv, .json, and .jsonl are supported.", ext)
+	}
+
+	if err != nil {
+		log.Fatalf("Error processing file %s: %v", *filePath, err)
+	}
+
+	config := Config{
+		DataSource: *filePath,
+		Matchers:   make([]Matcher, 0, len(headers)),
+	}
+
+	for _, header := range headers {
+		config.Matchers = append(config.Matchers, Matcher{
+			InputField:    header,
+			LookupField:   header,
+			Method:        "exact",
+			CaseSensitive: false,
+		})
+	}
+
+	output, err := json.MarshalIndent(config, "", "  ")
+	if err != nil {
+		log.Fatalf("Error generating json output: %v", err)
+	}
+
+	fmt.Println(string(output))
+}
+
+// extractHeadersFromCSV はCSVファイルのヘッダーを抽出します。
+func extractHeadersFromCSV(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not open file: %w", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	header, err := reader.Read()
+	if err != nil {
+		return nil, fmt.Errorf("could not read CSV header: %w", err)
+	}
+	return header, nil
+}
+
+// extractKeysFromJSON はJSONファイル内のすべてのキーをスキャンして抽出します。
+// JSON配列とJSONLの両方に対応します。
+func extractKeysFromJSON(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("could not open file: %w", err)
+	}
+	defer file.Close()
+
+	// ファイルの先頭を少し読んで、JSON配列かJSONLかを判断する
+	reader := bufio.NewReader(file)
+	firstBytes, err := reader.Peek(512) // 先頭512バイトを覗き見
+	if err != nil && err != io.EOF {
+		// ファイルが512バイトより小さい場合、EOFは期待されるがエラーではない
+	}
+
+	// ファイルの読み取り位置を先頭に戻す
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		return nil, fmt.Errorf("could not seek back to the beginning of the file: %w", err)
+	}
+
+	allKeys := make(map[string]struct{})
+
+	trimmedBytes := bytes.TrimSpace(firstBytes)
+	// JSON配列かどうかをチェック
+	if len(trimmedBytes) > 0 && trimmedBytes[0] == '[' {
+		var arr []map[string]interface{}
+		decoder := json.NewDecoder(file)
+		if err := decoder.Decode(&arr); err != nil {
+			return nil, fmt.Errorf("could not parse JSON array: %w", err)
+		}
+		for _, obj := range arr {
+			for k := range obj {
+				allKeys[k] = struct{}{}
+			}
+		}
+	} else { // JSONLと仮定
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			line := scanner.Bytes()
+			if len(bytes.TrimSpace(line)) == 0 {
+				continue
+			}
+			var data map[string]interface{}
+			if err := json.Unmarshal(line, &data); err != nil {
+				// 有効なJSONオブジェクトではない行は無視する
+				continue
+			}
+			for k := range data {
+				allKeys[k] = struct{}{}
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			return nil, fmt.Errorf("error scanning JSONL file: %w", err)
+		}
+	}
+
+	if len(allKeys) == 0 {
+		return nil, fmt.Errorf("no keys found in JSON file")
+	}
+
+	keys := make([]string, 0, len(allKeys))
+	for k := range allKeys {
+		keys = append(keys, k)
+	}
+	return keys, nil
 }

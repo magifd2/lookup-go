@@ -23,16 +23,55 @@ The tool reads JSON objects (either as a JSON Array or as JSON Lines) from stand
 
 ---
 
-## Installation
+## Configuration Helper (`generate-config`)
 
-To install `lookup-go`, you need to have Go installed on your system.
+To make setup easier, `lookup-go` provides a helper command to generate a configuration template from your data file. It scans your CSV, JSON, or JSONL file and creates a valid `config.json` structure based on the headers or keys it finds.
 
-1.  Clone the repository or save the source code as `main.go`.
-2.  Build the binary:
-    ```sh
-    go build -o lookup-go main.go
-    ```
-3.  Place the resulting `lookup-go` binary in a directory in your system's `PATH` (e.g., `/usr/local/bin`).
+### Usage
+
+```sh
+./lookup-go generate-config -file <path_to_your_data_file>
+```
+
+-   **`-file <path>`**: The path to your data source file (e.g., `users.csv` or `data.jsonl`).
+
+### Example
+
+Given a `users.csv` file with columns `username`, `department`, and `role`, the command:
+
+```sh
+./lookup-go generate-config -file users.csv
+```
+
+Will produce the following output, which you can save as your `config.json`:
+
+```json
+{
+  "data_source": "users.csv",
+  "matchers": [
+    {
+      "input_field": "username",
+      "lookup_field": "username",
+      "method": "exact",
+      "case_sensitive": false
+    },
+    {
+      "input_field": "department",
+      "lookup_field": "department",
+      "method": "exact",
+      "case_sensitive": false
+    },
+    {
+      "input_field": "role",
+      "lookup_field": "role",
+      "method": "exact",
+      "case_sensitive": false
+    }
+  ]
+}
+```
+
+You can then edit the `method` or other properties as needed.
 
 ---
 
