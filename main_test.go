@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -153,4 +153,54 @@ func compareJSONLines(actual, expected []byte) error {
 	}
 
 	return nil
+}
+
+func TestResolveDataSourcePath(t *testing.T) {
+	// Get home directory for testing ~ expansion
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		t.Fatalf("Could not get user home directory: %v", err)
+	}
+
+	testCases := []struct {
+		name         string
+		configPath   string
+		dataSource   string
+		expectedPath string
+	}{
+		{
+			name:         "Tilde expansion",
+			configPath:   "/config/dir/config.json",
+			dataSource:   "~/data/users.csv",
+			expectedPath: filepath.Join(homeDir, "data/users.csv"),
+		},
+		{
+			name:         "Absolute path",
+			configPath:   "/config/dir/config.json",
+			dataSource:   "/abs/path/to/data.json",
+			expectedPath: "/abs/path/to/data.json",
+		},
+		{
+			name:         "Relative path",
+			configPath:   "/config/dir/config.json",
+			dataSource:   "../data/users.csv",
+			expectedPath: "/config/data/users.csv",
+		},
+		{
+			name:         "Relative path with dot",
+			configPath:   "/config/dir/config.json",
+			dataSource:   "./data/users.csv",
+			expectedPath: "/config/dir/data/users.csv",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resolvedPath := resolveDataSourcePath(tc.configPath, tc.dataSource)
+			// Use filepath.Clean to normalize paths for comparison
+			if filepath.Clean(resolvedPath) != filepath.Clean(tc.expectedPath) {
+				t.Errorf("Expected path %s, but got %s", tc.expectedPath, resolvedPath)
+			}
+		})
+	}
 }

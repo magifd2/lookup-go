@@ -392,6 +392,12 @@ func loadConfig(path string) (*Config, error) {
 }
 
 func resolveDataSourcePath(configPath, dataSource string) string {
+	if strings.HasPrefix(dataSource, "~/") {
+		homeDir, err := os.UserHomeDir()
+		if err == nil {
+			return filepath.Join(homeDir, dataSource[2:])
+		}
+	}
 	if filepath.IsAbs(dataSource) {
 		return dataSource
 	}
