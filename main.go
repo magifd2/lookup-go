@@ -63,6 +63,58 @@ func main() {
 		return // generate-configが実行されたらここで終了
 	}
 
+	// カスタムのヘルプメッセージを設定
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `lookup-go: Enrich JSON/JSONL data by looking up values from external data sources.
+
+Usage:
+  lookup-go -c <config.json> -m "<mapping_rule>" < input.jsonl
+  lookup-go --dns -m "<mapping_rule>" < input.jsonl
+  lookup-go generate-config -file <data_source.csv/json> > config.json
+  lookup-go --version
+
+Description:
+  This tool reads JSON or JSONL data from stdin, looks up values based on a specified field,
+  and appends information from an external data source (CSV or JSON) or DNS to the output.
+
+Subcommands:
+  generate-config
+    Generates a template for the configuration file from a data source file.
+    Options:
+      -file string
+            Path to the data source file (CSV or JSON). (Required)
+
+Options:
+`)
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, `
+Mapping Rule (-m):
+  The mapping rule defines which fields to use for the lookup and how to map the output fields.
+  Format: "<input_field> as <lookup_field> OUTPUT <source_field1> as <target_field1>, <source_field2> as <target_field2>, ..."
+
+  - <input_field>:  Field name in the stdin JSON to use for the lookup.
+  - <lookup_field>: Field name in the data source to match against.
+  - OUTPUT:         Keyword to start defining output field mappings.
+  - <source_field>: Field name from the data source to append to the output.
+  - <target_field>: New field name for the appended data. If "as <target_field>" is omitted,
+                    the source_field name is used.
+
+Examples:
+  # 1. Basic Lookup
+  #    Lookup 'user_id' from stdin in 'users.csv' and append 'user_name' and 'email' as new fields.
+  $ cat input.jsonl | lookup-go -c lookup_config.json -m "user_id as id OUTPUT user_name as name, email"
+
+  # 2. Generate Config
+  #    Generate a config template from 'users.csv'.
+  $ lookup-go generate-config -file users.csv > lookup_config.json
+
+  # 3. DNS Lookup
+  #    Perform a DNS lookup for the IP address in the 'client_ip' field.
+  $ echo '{"client_ip":"8.8.8.8"}' | lookup-go --dns -m "client_ip as ip OUTPUT hostname"
+
+`)
+	}
+
 	flag.Parse()
 	log.SetOutput(os.Stderr)
 

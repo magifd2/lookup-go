@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-09-10
+
+### Changed
+
+-   **Improved Help Message**: The command-line help (`--help`) has been significantly enhanced to be more user-friendly. It now includes a detailed description, usage patterns, subcommand explanations, and practical examples to make the tool easier to understand and use.
+
 ## [1.1.0] - 2025-09-10
 
 ### Added
